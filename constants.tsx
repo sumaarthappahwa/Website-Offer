@@ -42,7 +42,7 @@ export const PLANS: PricingPlan[] = [
     badgeText: "🔥 Only for the First 10 Businesses!",
     description: "A professional digital start tailored for SMEs wanting an immediate global identity. | Worth 10,000/- hosting and domain free for one year | 🔥 Act Fast — Limited launch offer for early sign‑ups only!",
     features: [
-      "Custom 5-Page Website",
+      "5-Page Website",
       "Free 1-Year Domain",
       "Free 1-Year Hosting",
       "SSL Certificate",
@@ -63,6 +63,7 @@ export const PLANS: PricingPlan[] = [
     highlight: true,
     description: "For Manufacturers ready to lead the national market with advanced search visibility. | Worth 10,000/- hosting and domain free for one year | Includes full Google Business Profile (GBP) optimization and SEO.",
     features: [
+      "Advanced Dynamic Website",
       "Everything in Essentials",
       "FREE SEO Services",
       "GBP Optimization",
@@ -83,6 +84,7 @@ export const PLANS: PricingPlan[] = [
     price: 36000,
     description: "Tailored for high-scale Exporters looking to dominate international territories. | Worth 10,000/- hosting and domain free for one year | Includes premium ad credits for LinkedIn and Meta to jumpstart leads.",
     features: [
+      "Advanced Dynamic Website",
       "Everything in Growth Pro",
       "Advanced SEO & Analytics",
       "$50 Meta Ads Credit",

@@ -81,7 +81,7 @@ const PLANS: PricingPlan[] = [
     id: PackageType.BASIC,
     name: "Essentials Plan",
     price: 7999,
-    badgeText: "🔥 Only for the First 10 Businesses!",
+    badgeText: "🔥 ONLY FOR THE FIRST 10 BUSINESSES!",
     description: "A professional digital start tailored for SMEs wanting an immediate global identity. | Worth 10,000/- hosting and domain free for one year | 🔥 Act Fast — Limited launch offer for early sign‑ups only!",
     features: ["5-Page Website", "Free Domain (1yr)", "Free Hosting (1yr)", "SSL Secure", "Mobile Responsive", "₹ 8,000 Renewal"],
     scope: [
@@ -96,7 +96,7 @@ const PLANS: PricingPlan[] = [
     price: 18000,
     highlight: true,
     description: "For Manufacturers ready to lead the national market with advanced search visibility. | Worth 10,000/- hosting and domain free for one year | Includes full Google Business Profile (GBP) optimization and SEO.",
-    features: ["Full SEO Setup", "GBP Optimization", "Catalog (20 items)", "Advanced Forms", "Priority Support", "₹ 8,000 Renewal"],
+    features: ["Advanced Dynamic Website", "Full SEO Setup", "GBP Optimization", "Catalog (20 items)", "Advanced Forms", "Priority Support", "₹ 8,000 Renewal"],
     scope: [
       { title: "SEO", description: "Comprehensive on-page keyword targeting for your industry." },
       { title: "Local Maps", description: "Optimization for Google Maps to capture nearby industrial leads." }
@@ -108,7 +108,7 @@ const PLANS: PricingPlan[] = [
     name: "Global Leader",
     price: 36000,
     description: "Tailored for high-scale Exporters looking to dominate international territories. | Worth 10,000/- hosting and domain free for one year | Includes premium ad credits for LinkedIn and Meta to jumpstart leads.",
-    features: ["Everything in Growth", "$50 Meta Ads", "$50 LinkedIn Ads", "Multilingual Support", "WhatsApp Integration", "₹ 8,000 Renewal"],
+    features: ["Advanced Dynamic Website", "Everything in Growth", "$50 Meta Ads", "$50 LinkedIn Ads", "Multilingual Support", "WhatsApp Integration", "₹ 8,000 Renewal"],
     scope: [
       { title: "Ads Launch", description: "Configuration and management of $100 total ad credit." },
       { title: "Global Reach", description: "International SEO architecture and multilingual capabilities." }
@@ -153,10 +153,10 @@ Message: ${formData.message}
   };
 
   return (
-    <div className="min-h-screen bg-white selection:bg-blue-100 pb-20 md:pb-0">
+    <div className="min-h-screen bg-white selection:bg-blue-100 pb-20 md:pb-0 font-['Inter']">
       {/* Navbar */}
       <nav className="fixed w-full z-50 bg-white/80 backdrop-blur-lg border-b border-slate-100 py-4 px-6 md:px-12 flex justify-between items-center">
-        <div className="text-2xl font-black text-blue-600 tracking-tighter">EXPORT<span className="text-slate-800">LAUNCH</span></div>
+        <div className="text-2xl font-black text-blue-600 tracking-tighter uppercase">EXPORT<span className="text-slate-800">LAUNCH</span></div>
         <div className="hidden md:flex space-x-8 text-sm font-bold text-slate-600 uppercase tracking-widest">
           <a href="#services" className="hover:text-blue-600 transition">Services</a>
           <a href="#process" className="hover:text-blue-600 transition">Process</a>
@@ -165,18 +165,18 @@ Message: ${formData.message}
       </nav>
 
       {/* Hero */}
-      <section className="pt-40 pb-24 px-6 md:px-12 bg-gradient-to-b from-blue-50/50 to-white">
+      <section className="pt-40 pb-24 px-6 md:px-12 bg-gradient-to-b from-blue-50/50 to-white text-center">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
-          <div className="space-y-8 text-center lg:text-left">
+          <div className="space-y-8 flex flex-col items-center lg:items-center">
             <span className="inline-block px-4 py-1.5 bg-blue-100 text-blue-700 text-xs font-black rounded-full uppercase tracking-widest">Digital Powerhouse</span>
             <h1 className="text-6xl md:text-7xl font-black text-slate-900 leading-[1.1] tracking-tight">
               Fueling Your <br />
               <span className="text-blue-600">Global Sales</span> Engine.
             </h1>
-            <p className="text-xl text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+            <p className="text-xl text-slate-600 max-w-xl mx-auto leading-relaxed">
               Professional web development for exporters and manufacturers. One-year free domain/hosting. Fixed renewals. No hidden costs.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4 w-full">
               <a href="#services" className="px-12 py-6 bg-red-600 text-white font-black text-xl rounded-2xl hover:bg-red-700 shadow-[0_20px_50px_rgba(220,38,38,0.3)] transition-all hover:-translate-y-1 transform active:scale-95 text-center">
                 Claim My Exclusive Offer
               </a>
@@ -207,64 +207,71 @@ Message: ${formData.message}
       <section id="services" className="py-32 px-6 md:px-12">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6">Unbeatable Launch Packages</h2>
-            <p className="text-slate-500 text-lg max-w-2xl mx-auto">Exclusive offers for Manufacturers & SMEs looking to digitize their legacy operations.</p>
+            <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">Unbeatable Launch Packages</h2>
+            <p className="text-slate-500 text-lg max-w-3xl mx-auto">Dominate the EU, UK, New Zealand, Australia, and Africa before every big company starts replacing you.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {PLANS.map((plan) => {
               const isEssential = plan.id === PackageType.BASIC;
+              const isGrowth = plan.id === PackageType.GROWTH;
+              const isPremium = plan.id === PackageType.PREMIUM;
               const parts = plan.description.split(' | ');
+              
               return (
-                <div key={plan.id} className={`p-8 rounded-[2rem] border-2 transition-all flex flex-col ${
-                  plan.highlight 
-                    ? 'border-blue-600 bg-white ring-8 ring-blue-50' 
+                <div key={plan.id} className={`p-10 rounded-[2.5rem] border-4 transition-all flex flex-col ${
+                  isGrowth 
+                    ? 'border-blue-500 bg-white ring-8 ring-blue-50' 
                     : isEssential 
-                      ? 'border-amber-400 bg-amber-50/30' 
+                      ? 'border-[#FFC107] bg-white' 
                       : 'border-slate-100 bg-white'
                 } hover:shadow-2xl`}>
-                  <div className="flex-grow space-y-6">
-                    <div className="space-y-2">
-                      <h3 className="text-2xl font-black text-slate-900">{plan.name}</h3>
-                      {plan.badgeText && (
-                        <div className={`inline-block px-3 py-1 text-[10px] font-black rounded-lg uppercase tracking-tighter ${isEssential ? 'bg-amber-500 text-white' : 'bg-blue-100 text-blue-700'}`}>
+                  <div className="flex-grow space-y-8">
+                    <div className="space-y-4">
+                      <h3 className="text-3xl font-black text-slate-900">{plan.name}</h3>
+                      {isEssential && plan.badgeText && (
+                        <div className="w-full py-2.5 bg-[#F59E0B] text-white text-[11px] font-black rounded-lg text-center tracking-tighter">
                           {plan.badgeText}
                         </div>
                       )}
                     </div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-sm font-bold text-slate-400">₹</span>
-                      <span className="text-5xl font-black text-slate-900 tracking-tighter">{plan.price.toLocaleString()}</span>
+                    
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xl font-bold text-slate-400">₹</span>
+                      <span className="text-6xl font-black text-slate-900 tracking-tighter">{plan.price.toLocaleString()}</span>
                     </div>
 
-                    <div className="space-y-4">
-                      <p className="text-sm text-slate-600 font-medium">{parts[0]}</p>
-                      <div className={`p-4 rounded-xl border-2 ${isEssential ? 'bg-amber-100 border-amber-200' : 'bg-blue-50 border-blue-100'}`}>
-                        <p className={`text-sm font-black ${isEssential ? 'text-amber-900' : 'text-blue-700'}`}>
+                    <div className="space-y-6">
+                      <p className="text-[15px] text-slate-600 font-semibold leading-relaxed">{parts[0]}</p>
+                      
+                      {/* Featured Worth section */}
+                      <div className={`p-5 rounded-xl border-2 ${isEssential ? 'bg-amber-50 border-amber-100' : 'bg-blue-50 border-blue-100'}`}>
+                        <p className={`text-[15px] font-black ${isEssential ? 'text-amber-900' : 'text-blue-700'}`}>
                           {parts[1]}
                         </p>
                       </div>
-                      <p className="text-xs italic text-slate-500 leading-relaxed">{parts[2]}</p>
+                      
+                      <p className="text-xs italic text-slate-400 leading-relaxed font-medium">{parts[2]}</p>
                     </div>
 
-                    <ul className="space-y-4 pt-6 border-t border-slate-100">
+                    <ul className="space-y-4 pt-8 border-t border-slate-100">
                       {plan.features.map(f => (
-                        <li key={f} className="flex items-center gap-3 text-sm font-bold text-slate-700">
-                          <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
+                        <li key={f} className="flex items-center gap-3.5 text-sm font-bold text-slate-700">
+                          <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
                           {f}
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <a href={plan.razorpayLink} target="_blank" className={`mt-8 w-full py-4 rounded-xl text-center font-black transition-all ${
+                  <a href={plan.razorpayLink} target="_blank" className={`mt-10 w-full py-5 rounded-2xl text-center font-black transition-all text-lg ${
                     plan.highlight 
                       ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-xl shadow-blue-100' 
                       : isEssential 
-                        ? 'bg-amber-500 text-white hover:bg-amber-600' 
+                        ? 'bg-[#F59E0B] text-white hover:bg-amber-600 shadow-xl shadow-amber-100' 
                         : 'bg-slate-900 text-white hover:bg-black'
                   }`}>
-                    Order Now
+                    Order {plan.name}
                   </a>
                 </div>
               );
@@ -323,7 +330,7 @@ Message: ${formData.message}
                 <input required name="phone" value={formData.phone} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm" placeholder="Phone Number" />
               </div>
               <select name="selectedPackage" value={formData.selectedPackage} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm appearance-none">
-                {PLANS.map(p => <option key={p.id} value={p.id}>{p.name} - ₹{p.price}</option>)}
+                {PLANS.map(p => <option key={p.id} value={p.id}>{p.name} - ₹{p.price.toLocaleString()}</option>)}
               </select>
               <textarea rows={3} name="message" value={formData.message} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm" placeholder="Industry details or specific requirements..."></textarea>
               <button type="submit" className="w-full py-5 bg-blue-600 text-white font-black rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100 flex items-center justify-center gap-2">
@@ -338,11 +345,11 @@ Message: ${formData.message}
       {/* Footer */}
       <footer className="py-20 px-6 md:px-12 bg-white border-t border-slate-100">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
-          <div className="text-2xl font-black text-blue-600">EXPORT<span className="text-slate-800">LAUNCH</span></div>
+          <div className="text-2xl font-black text-blue-600 uppercase">EXPORT<span className="text-slate-800">LAUNCH</span></div>
           <p className="text-slate-400 text-sm">© 2024 ExportLaunch Digital. Managed by bloggingstudio.in</p>
           <div className="flex gap-8 text-xs font-black uppercase tracking-widest text-slate-400">
-            <a href="#" className="hover:text-blue-600">Privacy</a>
-            <a href="#" className="hover:text-blue-600">Terms</a>
+            <a href="#" className="hover:text-blue-600 transition underline underline-offset-4">Privacy</a>
+            <a href="#" className="hover:text-blue-600 transition underline underline-offset-4">Terms</a>
           </div>
         </div>
       </footer>
