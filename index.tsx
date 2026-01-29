@@ -153,7 +153,7 @@ Message: ${formData.message}
   };
 
   return (
-    <div className="min-h-screen bg-white selection:bg-blue-100">
+    <div className="min-h-screen bg-white selection:bg-blue-100 pb-20 md:pb-0">
       {/* Navbar */}
       <nav className="fixed w-full z-50 bg-white/80 backdrop-blur-lg border-b border-slate-100 py-4 px-6 md:px-12 flex justify-between items-center">
         <div className="text-2xl font-black text-blue-600 tracking-tighter">EXPORT<span className="text-slate-800">LAUNCH</span></div>
@@ -177,11 +177,8 @@ Message: ${formData.message}
               Professional web development for exporters and manufacturers. One-year free domain/hosting. Fixed renewals. No hidden costs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
-              <a href="#services" className="px-10 py-5 bg-blue-600 text-white font-bold text-lg rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all hover:-translate-y-1">
-                View Launch Offers
-              </a>
-              <a href="#contact" className="px-10 py-5 bg-white text-slate-900 border-2 border-slate-100 font-bold text-lg rounded-2xl hover:bg-slate-50 transition-all">
-                Contact Sales
+              <a href="#services" className="px-12 py-6 bg-red-600 text-white font-black text-xl rounded-2xl hover:bg-red-700 shadow-[0_20px_50px_rgba(220,38,38,0.3)] transition-all hover:-translate-y-1 transform active:scale-95 text-center">
+                Claim My Exclusive Offer
               </a>
             </div>
           </div>
@@ -349,6 +346,13 @@ Message: ${formData.message}
           </div>
         </div>
       </footer>
+
+      {/* Fixed Mobile Button */}
+      <div className="fixed bottom-0 left-0 w-full p-4 md:hidden z-[60] bg-white/10 backdrop-blur-sm">
+        <a href="#services" className="block w-full py-5 bg-red-600 text-white font-black text-lg rounded-2xl text-center shadow-[0_10px_30px_rgba(220,38,38,0.4)] active:scale-95 transition-all">
+          Claim My Exclusive Offer
+        </a>
+      </div>
     </div>
   );
 };
