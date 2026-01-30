@@ -2,6 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 
+// --- CONFIGURATION ---
+// PASTE YOUR DEPLOYED GOOGLE APPS SCRIPT URL HERE
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjUK-PKazvCmjLmq29xgQpyons5K4K3zP0pq1Ae19c4XlMkHhl27Sc1kbZ6E3C7NcA/exec';
+
 // --- TYPES ---
 enum PackageType {
   BASIC = 'BASIC',
@@ -161,7 +165,7 @@ const App: React.FC = () => {
     message: ''
   });
 
-  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -169,20 +173,38 @@ const App: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const subject = "Website Inquiry - ExportLaunch";
-    const body = `New Enquiry Details:
-----------------------------------
-Business: ${formData.businessName}
-Contact: ${formData.contactPerson}
-Email: ${formData.email}
-Phone: ${formData.phone}
-Package: ${formData.selectedPackage}
-Message: ${formData.message}
-----------------------------------`;
-    window.location.href = `mailto:samar@bloggingstudio.in?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    setFormSubmitted(true);
+    setStatus('submitting');
+
+    try {
+      // Send data to Google Apps Script
+      // mode: 'no-cors' is used because Apps Script does not return proper CORS headers for JSON POSTs, 
+      // but the request will still reach the script and execute correctly.
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      setStatus('success');
+      // Reset form on success
+      setFormData({
+        businessName: '',
+        contactPerson: '',
+        email: '',
+        phone: '',
+        industry: 'Manufacturer',
+        selectedPackage: PackageType.GROWTH,
+        message: ''
+      });
+    } catch (error) {
+      console.error('Submission error:', error);
+      setStatus('error');
+    }
   };
 
   return (
@@ -369,7 +391,7 @@ Message: ${formData.message}
             <div className="lg:col-span-2 bg-blue-600 p-12 text-white flex flex-col justify-between">
               <div>
                 <h3 className="text-3xl font-black mb-4">Start Your Project</h3>
-                <p className="opacity-80 text-sm leading-relaxed mb-10">Connect with our specialists to blueprint your new website. No pressure, just strategy.</p>
+                <p className="opacity-80 text-sm leading-relaxed mb-10">Connect with our specialists to blueprint your new website. Your details will be sent directly to findtarunph@gmail.com and logged in our Google Sheet.</p>
                 <div className="space-y-6">
                   <div className="flex gap-4 items-center">
                     <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-xl">📞</div>
@@ -383,24 +405,58 @@ Message: ${formData.message}
               </div>
               <div className="pt-10 text-xs font-bold opacity-50 uppercase tracking-widest">Available Mon-Sat</div>
             </div>
-            <form onSubmit={handleSubmit} className="lg:col-span-3 p-12 space-y-6">
-              <div className="grid sm:grid-cols-2 gap-6">
-                <input required name="businessName" value={formData.businessName} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Business Name" />
-                <input required name="contactPerson" value={formData.contactPerson} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Contact Person" />
-              </div>
-              <div className="grid sm:grid-cols-2 gap-6">
-                <input required type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Work Email" />
-                <input required name="phone" value={formData.phone} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Phone Number" />
-              </div>
-              <select name="selectedPackage" value={formData.selectedPackage} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium appearance-none">
-                {PLANS.map(p => <option key={p.id} value={p.id}>{p.name} - ₹{p.price.toLocaleString()}</option>)}
-              </select>
-              <textarea rows={3} name="message" value={formData.message} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Industry details or specific requirements..."></textarea>
-              <button type="submit" className="w-full py-5 bg-blue-600 text-white font-black rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100 flex items-center justify-center gap-2">
-                Send Inquiry <span className="text-xl">🚀</span>
-              </button>
-              {formSubmitted && <p className="text-center text-green-600 font-bold text-sm">Thank you! We'll be in touch soon.</p>}
-            </form>
+            <div className="lg:col-span-3 p-12">
+              {status === 'success' ? (
+                <div className="h-full flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in duration-500">
+                  <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-4xl">✓</div>
+                  <h3 className="text-2xl font-black text-slate-900">Inquiry Sent Successfully!</h3>
+                  <p className="text-slate-500 font-medium">We've received your details and logged them in our system. A team member will contact you shortly.</p>
+                  <button 
+                    onClick={() => setStatus('idle')}
+                    className="text-blue-600 font-bold underline hover:text-blue-700"
+                  >
+                    Send another inquiry
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <input required name="businessName" value={formData.businessName} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Business Name" />
+                    <input required name="contactPerson" value={formData.contactPerson} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Contact Person" />
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <input required type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Work Email" />
+                    <input required name="phone" value={formData.phone} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Phone Number" />
+                  </div>
+                  <select name="selectedPackage" value={formData.selectedPackage} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium appearance-none">
+                    {PLANS.map(p => <option key={p.id} value={p.id}>{p.name} - ₹{p.price.toLocaleString()}</option>)}
+                  </select>
+                  <textarea rows={3} name="message" value={formData.message} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Industry details or specific requirements..."></textarea>
+                  <button 
+                    disabled={status === 'submitting'}
+                    type="submit" 
+                    className={`w-full py-5 bg-blue-600 text-white font-black rounded-xl transition shadow-lg flex items-center justify-center gap-2 ${status === 'submitting' ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-700 active:scale-[0.98]'}`}
+                  >
+                    {status === 'submitting' ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Sending...
+                      </>
+                    ) : (
+                      <>Send Inquiry <span className="text-xl">🚀</span></>
+                    )}
+                  </button>
+                  {status === 'error' && (
+                    <p className="text-center text-red-500 font-bold text-sm">
+                      Something went wrong. Please check your internet or try again later.
+                    </p>
+                  )}
+                </form>
+              )}
+            </div>
           </div>
         </div>
       </section>
