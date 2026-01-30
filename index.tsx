@@ -144,7 +144,7 @@ const App: React.FC = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8 w-full">
               <a 
-                href="#contact" 
+                href="#services" 
                 className="px-16 py-8 bg-red-600 text-white font-black text-2xl rounded-[2.5rem] hover:bg-red-700 shadow-[0_25px_60px_rgba(220,38,38,0.4)] transition-all duration-300 hover:scale-105 hover:-translate-y-2 transform active:scale-95 text-center ring-4 ring-red-100/30"
               >
                 Claim My Exclusive Offer
@@ -172,37 +172,82 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* Pricing Section */}
       <section id="services" className="py-32 px-6 md:px-12">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-20 tracking-tight">Unbeatable Launch Packages</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {PLANS.map((plan) => (
-              <div key={plan.id} className={`p-8 rounded-[2.5rem] border-4 transition-all flex flex-col ${plan.highlight ? 'border-blue-500 bg-white ring-8 ring-blue-50' : 'border-slate-100 bg-white'} hover:shadow-2xl`}>
-                <div className="flex-grow space-y-6">
-                  <h3 className="text-3xl font-black">{plan.name}</h3>
-                  <div className="text-5xl font-black text-slate-900">₹{plan.price.toLocaleString()}</div>
-                  <ul className="space-y-3 text-left">
-                    {plan.features.map(f => (
-                      <li key={f} className="flex items-center gap-2 text-sm font-bold text-slate-600">
-                        <span className="text-green-500">✓</span> {f}
-                      </li>
-                    ))}
-                  </ul>
+          <div className="grid md:grid-cols-3 gap-8 items-stretch">
+            {PLANS.map((plan) => {
+              const isEssential = plan.id === PackageType.BASIC;
+              const isGrowth = plan.highlight;
+              
+              return (
+                <div key={plan.id} className={`p-8 rounded-[2.5rem] border-4 transition-all flex flex-col relative ${
+                  isEssential 
+                    ? 'border-orange-400 bg-orange-50/30 scale-105 z-10 shadow-xl' 
+                    : isGrowth 
+                      ? 'border-blue-500 bg-white ring-8 ring-blue-50' 
+                      : 'border-slate-100 bg-white'
+                } hover:shadow-2xl transform transition-transform duration-300`}>
+                  
+                  {isGrowth && (
+                    <span className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-blue-600 text-white text-[10px] font-bold rounded-full uppercase tracking-tighter">Recommended</span>
+                  )}
+                  
+                  <div className="flex-grow space-y-6">
+                    <div className="space-y-2">
+                      <h3 className={`text-3xl font-black ${isEssential ? 'text-orange-900' : 'text-slate-900'}`}>{plan.name}</h3>
+                      {plan.badgeText && (
+                        <div className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg inline-block ${isEssential ? 'bg-orange-600 text-white animate-pulse' : 'bg-slate-100 text-slate-600'}`}>
+                          {plan.badgeText}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="text-5xl font-black text-slate-900">₹{plan.price.toLocaleString()}</div>
+                    
+                    <div className="space-y-4">
+                      <p className={`text-sm leading-relaxed text-left ${isEssential ? 'text-orange-800 font-semibold' : 'text-slate-600'}`}>
+                        {plan.description.split(' | ')[0]}
+                      </p>
+                    </div>
+
+                    <ul className="space-y-3 text-left pt-6 border-t border-slate-100">
+                      {plan.features.map(f => (
+                        <li key={f} className="flex items-center gap-2 text-sm font-bold text-slate-600">
+                          <span className={isEssential ? 'text-orange-500' : 'text-green-500'}>✓</span> {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <a 
+                    href={plan.razorpayLink} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className={`mt-10 w-full py-5 rounded-2xl text-center font-black transition-all text-lg shadow-lg ${
+                      isEssential 
+                        ? 'bg-orange-600 text-white hover:bg-orange-700 shadow-orange-100' 
+                        : isGrowth 
+                          ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-100' 
+                          : 'bg-slate-900 text-white hover:bg-black'
+                    }`}
+                  >
+                    Order {plan.name}
+                  </a>
                 </div>
-                <a href="#contact" className="mt-8 py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition text-center">Select {plan.name}</a>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* Process Section (RESTORED) */}
+      {/* Process Section */}
       <section id="process" className="py-32 px-6 md:px-12 bg-slate-900 text-white rounded-t-[4rem] md:rounded-t-[8rem]">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-3 gap-12 items-center mb-16">
             <div className="md:col-span-2 space-y-6">
-              <h2 className="text-4xl md:text-5xl font-black">Our Workflow</h2>
+              <h2 className="text-4xl md:text-5xl font-black text-white">Our Workflow</h2>
               <p className="text-slate-400 text-lg max-w-2xl">
                 Systematic engineering of your digital presence. We don't just build websites; we build marketing engines for industrial growth.
               </p>
@@ -232,25 +277,29 @@ const App: React.FC = () => {
       {/* FAQ */}
       <section id="faq" className="py-32 px-6 md:px-12 bg-white">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-black text-center mb-16">Frequently Asked Questions</h2>
+          <h2 className="text-4xl font-black text-center mb-16 text-slate-900">Frequently Asked Questions</h2>
           <div className="space-y-4">
             {FAQ_DATA.map((item, idx) => (
               <div key={idx} className="border border-slate-100 rounded-2xl overflow-hidden">
                 <button 
                   onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
-                  className="w-full px-8 py-6 text-left flex justify-between items-center bg-white hover:bg-slate-50 font-bold text-lg"
+                  className="w-full px-8 py-6 text-left flex justify-between items-center bg-white hover:bg-slate-50 font-bold text-lg text-slate-900"
                 >
                   {item.question}
-                  <span>{openFaqIndex === idx ? '−' : '+'}</span>
+                  <span className="text-blue-600">{openFaqIndex === idx ? '−' : '+'}</span>
                 </button>
-                {openFaqIndex === idx && <div className="px-8 pb-8 text-slate-500 font-medium">{item.answer}</div>}
+                {openFaqIndex === idx && (
+                  <div className="px-8 pb-8 text-slate-500 font-medium leading-relaxed">
+                    {item.answer}
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Embedded External Form */}
+      {/* Contact Section with Responsive Iframe */}
       <section id="contact" className="py-32 px-6 md:px-12 bg-slate-50">
         <div className="max-w-6xl mx-auto">
           <div className="bg-white rounded-[3rem] shadow-2xl border border-slate-100 overflow-hidden grid lg:grid-cols-5">
@@ -270,16 +319,13 @@ const App: React.FC = () => {
               </div>
             </div>
             
-            <div className="lg:col-span-3 p-4 flex justify-center items-center bg-white overflow-hidden">
-              <div className="w-full max-w-[640px] aspect-square lg:aspect-auto">
+            <div className="lg:col-span-3 p-0 sm:p-4 flex justify-center items-center bg-white">
+              <div className="w-full h-full min-h-[500px] flex items-center justify-center">
                 <iframe 
                   src="https://automateforms.ai/form/36093e18-3273-4fd5-9ba5-c5bcf48e97d8?embedded=true" 
-                  width="100%" 
-                  height="488" 
-                  frameBorder="0" 
-                  marginHeight={0} 
-                  marginWidth={0}
-                  className="rounded-xl"
+                  className="w-full h-full min-h-[500px] sm:min-h-[488px] border-0"
+                  style={{ width: '100%', height: '550px', border: 'none' }}
+                  title="Contact Form"
                 >
                   Loading…
                 </iframe>
