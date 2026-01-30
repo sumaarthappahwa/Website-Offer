@@ -2,62 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 
-/**
- * GOOGLE APPS SCRIPT SETUP (Mandatory for the form to work):
- * 1. Open your Google Sheet: https://docs.google.com/spreadsheets/d/1YcHBDwZ6cYFmiyeejkH-l6NNtUmubP-yiNkDNr-ZyfU/edit
- * 2. Go to Extensions > Apps Script.
- * 3. Delete existing code and paste this:
- * 
- * function doPost(e) {
- *   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
- *   var data = JSON.parse(e.postData.contents);
- *   
- *   // Save to Sheet
- *   sheet.appendRow([
- *     new Date(), 
- *     data.businessName, 
- *     data.contactPerson, 
- *     data.email, 
- *     data.phone, 
- *     data.industry, 
- *     data.selectedPackage, 
- *     data.domainPref, 
- *     data.message
- *   ]);
- *   
- *   // Send Email
- *   var recipient = "findtarunph@gmail.com";
- *   var subject = "New Website Inquiry from " + data.businessName;
- *   var body = "You have a new inquiry:\n\n" +
- *              "Business: " + data.businessName + "\n" +
- *              "Contact: " + data.contactPerson + "\n" +
- *              "Email: " + data.email + "\n" +
- *              "Phone: " + data.phone + "\n" +
- *              "Industry: " + data.industry + "\n" +
- *              "Package: " + data.selectedPackage + "\n" +
- *              "Domain Pref: " + data.domainPref + "\n" +
- *              "Message: " + data.message;
- *   
- *   MailApp.sendEmail(recipient, subject, body);
- *   
- *   return ContentService.createTextOutput(JSON.stringify({ 'result': 'success' }))
- *     .setMimeType(ContentService.MimeType.JSON);
- * }
- * 
- * 4. Click 'Deploy' > 'New Deployment'.
- * 5. Select 'Web App'.
- * 6. Set 'Execute as' to 'Me'.
- * 7. Set 'Who has access' to 'Anyone'.
- * 8. Deploy and copy the Web App URL into the SCRIPT_URL variable below.
- */
-
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzL5z7k5xH0-placeholder/exec'; // Replace with your actual URL after deployment
-
 // --- TYPES ---
 enum PackageType {
   BASIC = 'BASIC',
   GROWTH = 'GROWTH',
   PREMIUM = 'PREMIUM'
+}
+
+interface ServiceScope {
+  title: string;
+  description: string;
 }
 
 interface PricingPlan {
@@ -66,9 +20,16 @@ interface PricingPlan {
   price: number;
   description: string;
   features: string[];
+  scope: ServiceScope[];
   highlight?: boolean;
   badgeText?: string;
   razorpayLink: string;
+}
+
+interface ProcessStep {
+  number: string;
+  title: string;
+  description: string;
 }
 
 interface FormData {
@@ -78,7 +39,6 @@ interface FormData {
   phone: string;
   industry: string;
   selectedPackage: PackageType;
-  domainPref: string;
   message: string;
 }
 
@@ -88,6 +48,39 @@ interface FAQItem {
 }
 
 // --- CONSTANTS ---
+const PROCESS_STEPS: ProcessStep[] = [
+  {
+    number: "01",
+    title: "Discovery & Strategy",
+    description: "We analyze your industrial niche to identify global buyer personas and competitor gaps."
+  },
+  {
+    number: "02",
+    title: "Design & UX",
+    description: "Creating a professional interface that builds instant credibility with international clients."
+  },
+  {
+    number: "03",
+    title: "Development",
+    description: "Building a high-performance, mobile-first platform optimized for speed and conversion."
+  },
+  {
+    number: "04",
+    title: "Content & Catalog",
+    description: "Structuring your product technical sheets and business profile for clarity."
+  },
+  {
+    number: "05",
+    title: "SEO & Growth",
+    description: "Optimizing for search engines and setting up visibility channels (GBP/Ads)."
+  },
+  {
+    number: "06",
+    title: "Launch & Training",
+    description: "Final deployment on premium hosting with a training session for your team."
+  }
+];
+
 const PLANS: PricingPlan[] = [
   {
     id: PackageType.BASIC,
@@ -96,6 +89,10 @@ const PLANS: PricingPlan[] = [
     badgeText: "🔥 ONLY FOR THE FIRST 10 BUSINESSES!",
     description: "A professional digital start tailored for SMEs wanting an immediate global identity. | Worth 10,000/- hosting and domain free for one year | 🔥 Act Fast — Limited launch offer for early sign‑ups only!",
     features: ["5-Page Website", "Free Domain (1yr)", "Free Hosting (1yr)", "SSL Secure", "Mobile Responsive", "₹ 8,000 Renewal"],
+    scope: [
+      { title: "Design", description: "Standard Industrial Template customized with your branding." },
+      { title: "Pages", description: "Home, About, Services, Gallery, and Contact." }
+    ],
     razorpayLink: "https://rzp.io/rzp/GDcsLwH"
   },
   {
@@ -105,6 +102,10 @@ const PLANS: PricingPlan[] = [
     highlight: true,
     description: "For Manufacturers ready to lead the national market with advanced search visibility. | Worth 10,000/- hosting and domain free for one year | Includes full Google Business Profile (GBP) optimization and SEO.",
     features: ["Advanced Dynamic Website", "Full SEO Setup", "GBP Optimization", "Catalog (20 items)", "Advanced Forms", "Priority Support", "₹ 8,000 Renewal"],
+    scope: [
+      { title: "SEO", description: "Comprehensive on-page keyword targeting for your industry." },
+      { title: "Local Maps", description: "Optimization for Google Maps to capture nearby industrial leads." }
+    ],
     razorpayLink: "https://rzp.io/rzp/dhV3ctX"
   },
   {
@@ -113,6 +114,10 @@ const PLANS: PricingPlan[] = [
     price: 36000,
     description: "Tailored for high-scale Exporters looking to dominate international territories. | Worth 10,000/- hosting and domain free for one year | Includes premium ad credits for LinkedIn and Meta to jumpstart leads.",
     features: ["Advanced Dynamic Website", "Everything in Growth", "$50 Meta Ads", "$50 LinkedIn Ads", "Multilingual Support", "WhatsApp Integration", "₹ 8,000 Renewal"],
+    scope: [
+      { title: "Ads Launch", description: "Configuration and management of $100 total ad credit." },
+      { title: "Global Reach", description: "International SEO architecture and multilingual capabilities." }
+    ],
     razorpayLink: "https://rzp.io/rzp/OcOeP4sU"
   }
 ];
@@ -133,6 +138,14 @@ const FAQ_DATA: FAQItem[] = [
   {
     question: "Is the website optimized for mobile and tablets?",
     answer: "Absolutely. Every website we build is mobile-first and fully responsive, ensuring your global buyers can view your catalog perfectly on any device."
+  },
+  {
+    question: "Do you provide technical support after the site goes live?",
+    answer: "Yes, we provide priority support for all our clients. We also offer a training session for your team to ensure you can manage inquiries and minor updates independently."
+  },
+  {
+    question: "Can I upgrade my package later?",
+    answer: "Yes, our systems are built to scale. You can start with the Essentials plan and upgrade to Growth or Global Leader as your international operations expand."
   }
 ];
 
@@ -143,14 +156,12 @@ const App: React.FC = () => {
     contactPerson: '',
     email: '',
     phone: '',
-    industry: '',
+    industry: 'Manufacturer',
     selectedPackage: PackageType.GROWTH,
-    domainPref: '',
     message: ''
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [formSubmitted, setFormSubmitted] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -158,38 +169,20 @@ const App: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setStatus('idle');
-
-    try {
-      const response = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-
-      // Since we use no-cors, we can't check the response body, 
-      // but if the fetch doesn't throw, we assume success or the request was sent.
-      setStatus('success');
-      setFormData({
-        businessName: '',
-        contactPerson: '',
-        email: '',
-        phone: '',
-        industry: '',
-        selectedPackage: PackageType.GROWTH,
-        domainPref: '',
-        message: ''
-      });
-    } catch (error) {
-      console.error('Submission error:', error);
-      setStatus('error');
-    } finally {
-      setIsSubmitting(false);
-    }
+    const subject = "Website Inquiry - ExportLaunch";
+    const body = `New Enquiry Details:
+----------------------------------
+Business: ${formData.businessName}
+Contact: ${formData.contactPerson}
+Email: ${formData.email}
+Phone: ${formData.phone}
+Package: ${formData.selectedPackage}
+Message: ${formData.message}
+----------------------------------`;
+    window.location.href = `mailto:samar@bloggingstudio.in?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    setFormSubmitted(true);
   };
 
   return (
@@ -199,6 +192,7 @@ const App: React.FC = () => {
         <div className="text-2xl font-black text-blue-600 tracking-tighter uppercase">EXPORT<span className="text-slate-800">LAUNCH</span></div>
         <div className="hidden md:flex space-x-8 text-sm font-bold text-slate-600 uppercase tracking-widest">
           <a href="#services" className="hover:text-blue-600 transition">Services</a>
+          <a href="#process" className="hover:text-blue-600 transition">Process</a>
           <a href="#faq" className="hover:text-blue-600 transition">FAQ</a>
           <a href="#contact" className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Get Started</a>
         </div>
@@ -218,7 +212,7 @@ const App: React.FC = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8 w-full">
               <a 
-                href="#contact" 
+                href="#services" 
                 className="px-16 py-8 bg-red-600 text-white font-black text-2xl rounded-[2.5rem] hover:bg-red-700 shadow-[0_25px_60px_rgba(220,38,38,0.4)] transition-all duration-300 hover:scale-105 hover:-translate-y-2 transform active:scale-95 text-center ring-4 ring-red-100/30"
               >
                 Claim My Exclusive Offer
@@ -246,112 +240,189 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* Services/Pricing */}
       <section id="services" className="py-32 px-6 md:px-12">
-        <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-20 tracking-tight">Unbeatable Launch Packages</h2>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">Unbeatable Launch Packages</h2>
+            <p className="text-slate-500 text-lg max-w-3xl mx-auto">Dominate the EU, UK, New Zealand, Australia, and Africa before every big company starts replacing you.</p>
+          </div>
+
           <div className="grid md:grid-cols-3 gap-8">
-            {PLANS.map((plan) => (
-              <div key={plan.id} className={`p-8 rounded-[2.5rem] border-4 transition-all flex flex-col ${plan.highlight ? 'border-blue-500 bg-white ring-8 ring-blue-50' : 'border-slate-100 bg-white'} hover:shadow-2xl`}>
-                <div className="flex-grow space-y-6">
-                  <h3 className="text-3xl font-black">{plan.name}</h3>
-                  <div className="text-5xl font-black text-slate-900">₹{plan.price.toLocaleString()}</div>
-                  <ul className="space-y-3 text-left">
-                    {plan.features.map(f => (
-                      <li key={f} className="flex items-center gap-2 text-sm font-bold text-slate-600">
-                        <span className="text-green-500">✓</span> {f}
-                      </li>
-                    ))}
-                  </ul>
+            {PLANS.map((plan) => {
+              const isEssential = plan.id === PackageType.BASIC;
+              const isGrowth = plan.id === PackageType.GROWTH;
+              const parts = plan.description.split(' | ');
+              
+              return (
+                <div key={plan.id} className={`p-10 rounded-[2.5rem] border-4 transition-all flex flex-col ${
+                  isGrowth 
+                    ? 'border-blue-500 bg-white ring-8 ring-blue-50' 
+                    : isEssential 
+                      ? 'border-[#FFC107] bg-white' 
+                      : 'border-slate-100 bg-white'
+                } hover:shadow-2xl`}>
+                  <div className="flex-grow space-y-8">
+                    <div className="space-y-4">
+                      <h3 className="text-3xl font-black text-slate-900">{plan.name}</h3>
+                      {isEssential && plan.badgeText && (
+                        <div className="w-full py-2.5 bg-[#F59E0B] text-white text-[11px] font-black rounded-lg text-center tracking-tighter">
+                          {plan.badgeText}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xl font-bold text-slate-400">₹</span>
+                      <span className="text-6xl font-black text-slate-900 tracking-tighter">{plan.price.toLocaleString()}</span>
+                    </div>
+
+                    <div className="space-y-6">
+                      <p className="text-[15px] text-slate-600 font-semibold leading-relaxed">{parts[0]}</p>
+                      <div className={`p-5 rounded-xl border-2 ${isEssential ? 'bg-amber-50 border-amber-100' : 'bg-blue-50 border-blue-100'}`}>
+                        <p className={`text-[15px] font-black ${isEssential ? 'text-amber-900' : 'text-blue-700'}`}>
+                          {parts[1]}
+                        </p>
+                      </div>
+                      <p className="text-xs italic text-slate-400 leading-relaxed font-medium">{parts[2]}</p>
+                    </div>
+
+                    <ul className="space-y-4 pt-8 border-t border-slate-100">
+                      {plan.features.map(f => (
+                        <li key={f} className="flex items-center gap-3.5 text-sm font-bold text-slate-700">
+                          <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <a href={plan.razorpayLink} target="_blank" className={`mt-10 w-full py-5 rounded-2xl text-center font-black transition-all text-lg ${
+                    plan.highlight 
+                      ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-xl shadow-blue-100' 
+                      : isEssential 
+                        ? 'bg-[#F59E0B] text-white hover:bg-amber-600 shadow-xl shadow-amber-100' 
+                        : 'bg-slate-900 text-white hover:bg-black'
+                  }`}>
+                    Order {plan.name}
+                  </a>
                 </div>
-                <a href="#contact" className="mt-8 py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition">Select {plan.name}</a>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Process */}
+      <section id="process" className="py-32 px-6 md:px-12 bg-slate-900 text-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-20 text-center lg:text-left">
+            <h2 className="text-4xl md:text-5xl font-black mb-6">Our Workflow</h2>
+            <p className="text-slate-400 text-lg">Systematic engineering of your digital presence.</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
+            {PROCESS_STEPS.map(step => (
+              <div key={step.number} className="group">
+                <div className="text-6xl font-black text-white/5 mb-4 group-hover:text-blue-600/20 transition-colors">{step.number}</div>
+                <h4 className="text-xl font-bold mb-3">{step.title}</h4>
+                <p className="text-slate-400 text-sm leading-relaxed">{step.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* FAQ Section */}
       <section id="faq" className="py-32 px-6 md:px-12 bg-white">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-black text-center mb-16">Frequently Asked Questions</h2>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6">Common Questions</h2>
+            <p className="text-slate-500 text-lg">Everything you need to know about our industrial web services.</p>
+          </div>
           <div className="space-y-4">
             {FAQ_DATA.map((item, idx) => (
-              <div key={idx} className="border border-slate-100 rounded-2xl overflow-hidden">
+              <div key={idx} className="border border-slate-100 rounded-2xl overflow-hidden transition-all hover:border-blue-100">
                 <button 
                   onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
-                  className="w-full px-8 py-6 text-left flex justify-between items-center bg-white hover:bg-slate-50 font-bold text-lg"
+                  className="w-full px-8 py-6 text-left flex justify-between items-center bg-white hover:bg-slate-50 transition-colors"
                 >
-                  {item.question}
-                  <span>{openFaqIndex === idx ? '−' : '+'}</span>
+                  <span className="text-lg font-bold text-slate-900">{item.question}</span>
+                  <span className={`text-2xl transition-transform ${openFaqIndex === idx ? 'rotate-180' : ''}`}>
+                    {openFaqIndex === idx ? '−' : '+'}
+                  </span>
                 </button>
-                {openFaqIndex === idx && <div className="px-8 pb-8 text-slate-500 font-medium">{item.answer}</div>}
+                {openFaqIndex === idx && (
+                  <div className="px-8 pb-8 text-slate-600 leading-relaxed font-medium">
+                    {item.answer}
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Working Contact Form */}
+      {/* Contact Form */}
       <section id="contact" className="py-32 px-6 md:px-12 bg-slate-50">
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-[3rem] shadow-2xl border border-slate-100 overflow-hidden grid lg:grid-cols-5">
             <div className="lg:col-span-2 bg-blue-600 p-12 text-white flex flex-col justify-between">
-              <div className="space-y-8">
-                <h3 className="text-3xl font-black">Start Your Project</h3>
-                <p className="opacity-80">Your details will be automatically logged in our tracking system and sent to findtarunph@gmail.com for immediate action.</p>
-                <div className="space-y-4 font-bold">
-                    <p>📞 +91 721 787 3028</p>
-                    <p>✉️ samar@bloggingstudio.in</p>
+              <div>
+                <h3 className="text-3xl font-black mb-4">Start Your Project</h3>
+                <p className="opacity-80 text-sm leading-relaxed mb-10">Connect with our specialists to blueprint your new website. No pressure, just strategy.</p>
+                <div className="space-y-6">
+                  <div className="flex gap-4 items-center">
+                    <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-xl">📞</div>
+                    <span className="font-bold">+91 721 787 3028</span>
+                  </div>
+                  <div className="flex gap-4 items-center">
+                    <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-xl">✉️</div>
+                    <span className="font-bold">samar@bloggingstudio.in</span>
+                  </div>
                 </div>
               </div>
+              <div className="pt-10 text-xs font-bold opacity-50 uppercase tracking-widest">Available Mon-Sat</div>
             </div>
-            
-            <div className="lg:col-span-3 p-12">
-              {status === 'success' ? (
-                <div className="h-full flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in scale-in duration-500">
-                  <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-4xl">✓</div>
-                  <h3 className="text-2xl font-black">Success!</h3>
-                  <p className="text-slate-500 font-medium">Your inquiry has been sent to our team. We'll be in touch within 24 hours.</p>
-                  <button onClick={() => setStatus('idle')} className="text-blue-600 font-bold underline">Submit another</button>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <input required name="businessName" value={formData.businessName} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold" placeholder="Business Name" />
-                    <input required name="contactPerson" value={formData.contactPerson} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold" placeholder="Your Name" />
-                  </div>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <input required type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold" placeholder="Email" />
-                    <input required name="phone" value={formData.phone} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold" placeholder="Phone" />
-                  </div>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <input name="industry" value={formData.industry} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold" placeholder="Industry (e.g. Textiles)" />
-                    <select name="selectedPackage" value={formData.selectedPackage} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold">
-                      {PLANS.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                    </select>
-                  </div>
-                  <input name="domainPref" value={formData.domainPref} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold" placeholder="Domain Preference (optional)" />
-                  <textarea rows={3} name="message" value={formData.message} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold" placeholder="Requirements..."></textarea>
-                  
-                  <button 
-                    disabled={isSubmitting}
-                    type="submit" 
-                    className="w-full py-5 bg-blue-600 text-white font-black rounded-xl hover:bg-blue-700 transition shadow-lg flex items-center justify-center gap-3 disabled:opacity-70"
-                  >
-                    {isSubmitting ? 'Submitting...' : 'Send Inquiry 🚀'}
-                  </button>
-                  {status === 'error' && <p className="text-red-500 text-center font-bold text-xs">Error sending inquiry. Please check your connection.</p>}
-                </form>
-              )}
-            </div>
+            <form onSubmit={handleSubmit} className="lg:col-span-3 p-12 space-y-6">
+              <div className="grid sm:grid-cols-2 gap-6">
+                <input required name="businessName" value={formData.businessName} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Business Name" />
+                <input required name="contactPerson" value={formData.contactPerson} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Contact Person" />
+              </div>
+              <div className="grid sm:grid-cols-2 gap-6">
+                <input required type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Work Email" />
+                <input required name="phone" value={formData.phone} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Phone Number" />
+              </div>
+              <select name="selectedPackage" value={formData.selectedPackage} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium appearance-none">
+                {PLANS.map(p => <option key={p.id} value={p.id}>{p.name} - ₹{p.price.toLocaleString()}</option>)}
+              </select>
+              <textarea rows={3} name="message" value={formData.message} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Industry details or specific requirements..."></textarea>
+              <button type="submit" className="w-full py-5 bg-blue-600 text-white font-black rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100 flex items-center justify-center gap-2">
+                Send Inquiry <span className="text-xl">🚀</span>
+              </button>
+              {formSubmitted && <p className="text-center text-green-600 font-bold text-sm">Thank you! We'll be in touch soon.</p>}
+            </form>
           </div>
         </div>
       </section>
 
-      <footer className="py-20 bg-white border-t text-center text-slate-400 text-sm">
-        © 2024 ExportLaunch | Managed by bloggingstudio.in
+      {/* Footer */}
+      <footer className="py-20 px-6 md:px-12 bg-white border-t border-slate-100 text-center md:text-left">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
+          <div className="text-2xl font-black text-blue-600 uppercase">EXPORT<span className="text-slate-800">LAUNCH</span></div>
+          <p className="text-slate-400 text-sm font-medium">© 2024 ExportLaunch Digital. Managed by bloggingstudio.in</p>
+          <div className="flex gap-8 text-xs font-black uppercase tracking-widest text-slate-400">
+            <a href="#" className="hover:text-blue-600 transition underline underline-offset-4">Privacy</a>
+            <a href="#" className="hover:text-blue-600 transition underline underline-offset-4">Terms</a>
+          </div>
+        </div>
       </footer>
+
+      {/* Fixed Mobile Button */}
+      <div className="fixed bottom-0 left-0 w-full p-4 md:hidden z-[60] bg-white/10 backdrop-blur-sm">
+        <a href="#services" className="block w-full py-5 bg-red-600 text-white font-black text-lg rounded-2xl text-center shadow-[0_10px_30px_rgba(220,38,38,0.4)] active:scale-95 transition-all">
+          Claim My Exclusive Offer
+        </a>
+      </div>
     </div>
   );
 };
