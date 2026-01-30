@@ -1,10 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
-
-// --- CONFIGURATION ---
-// PASTE YOUR DEPLOYED GOOGLE APPS SCRIPT URL HERE
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxjUK-PKazvCmjLmq29xgQpyons5K4K3zP0pq1Ae19c4XlMkHhl27Sc1kbZ6E3C7NcA/exec";
 
 // --- TYPES ---
 enum PackageType {
@@ -13,42 +9,26 @@ enum PackageType {
   PREMIUM = 'PREMIUM'
 }
 
-interface ServiceScope {
-  title: string;
-  description: string;
-}
-
 interface PricingPlan {
   id: PackageType;
   name: string;
   price: number;
   description: string;
   features: string[];
-  scope: ServiceScope[];
   highlight?: boolean;
   badgeText?: string;
   razorpayLink: string;
+}
+
+interface FAQItem {
+  question: string;
+  answer: string;
 }
 
 interface ProcessStep {
   number: string;
   title: string;
   description: string;
-}
-
-interface FormData {
-  businessName: string;
-  contactPerson: string;
-  email: string;
-  phone: string;
-  industry: string;
-  selectedPackage: PackageType;
-  message: string;
-}
-
-interface FAQItem {
-  question: string;
-  answer: string;
 }
 
 // --- CONSTANTS ---
@@ -60,12 +40,12 @@ const PROCESS_STEPS: ProcessStep[] = [
   },
   {
     number: "02",
-    title: "Design & UX",
+    title: "Architecture & UI",
     description: "Creating a professional interface that builds instant credibility with international clients."
   },
   {
     number: "03",
-    title: "Development",
+    title: "Agile Development",
     description: "Building a high-performance, mobile-first platform optimized for speed and conversion."
   },
   {
@@ -93,10 +73,6 @@ const PLANS: PricingPlan[] = [
     badgeText: "🔥 ONLY FOR THE FIRST 10 BUSINESSES!",
     description: "A professional digital start tailored for SMEs wanting an immediate global identity. | Worth 10,000/- hosting and domain free for one year | 🔥 Act Fast — Limited launch offer for early sign‑ups only!",
     features: ["5-Page Website", "Free Domain (1yr)", "Free Hosting (1yr)", "SSL Secure", "Mobile Responsive", "₹ 8,000 Renewal"],
-    scope: [
-      { title: "Design", description: "Standard Industrial Template customized with your branding." },
-      { title: "Pages", description: "Home, About, Services, Gallery, and Contact." }
-    ],
     razorpayLink: "https://rzp.io/rzp/GDcsLwH"
   },
   {
@@ -106,10 +82,6 @@ const PLANS: PricingPlan[] = [
     highlight: true,
     description: "For Manufacturers ready to lead the national market with advanced search visibility. | Worth 10,000/- hosting and domain free for one year | Includes full Google Business Profile (GBP) optimization and SEO.",
     features: ["Advanced Dynamic Website", "Full SEO Setup", "GBP Optimization", "Catalog (20 items)", "Advanced Forms", "Priority Support", "₹ 8,000 Renewal"],
-    scope: [
-      { title: "SEO", description: "Comprehensive on-page keyword targeting for your industry." },
-      { title: "Local Maps", description: "Optimization for Google Maps to capture nearby industrial leads." }
-    ],
     razorpayLink: "https://rzp.io/rzp/dhV3ctX"
   },
   {
@@ -118,10 +90,6 @@ const PLANS: PricingPlan[] = [
     price: 36000,
     description: "Tailored for high-scale Exporters looking to dominate international territories. | Worth 10,000/- hosting and domain free for one year | Includes premium ad credits for LinkedIn and Meta to jumpstart leads.",
     features: ["Advanced Dynamic Website", "Everything in Growth", "$50 Meta Ads", "$50 LinkedIn Ads", "Multilingual Support", "WhatsApp Integration", "₹ 8,000 Renewal"],
-    scope: [
-      { title: "Ads Launch", description: "Configuration and management of $100 total ad credit." },
-      { title: "Global Reach", description: "International SEO architecture and multilingual capabilities." }
-    ],
     razorpayLink: "https://rzp.io/rzp/OcOeP4sU"
   }
 ];
@@ -142,70 +110,12 @@ const FAQ_DATA: FAQItem[] = [
   {
     question: "Is the website optimized for mobile and tablets?",
     answer: "Absolutely. Every website we build is mobile-first and fully responsive, ensuring your global buyers can view your catalog perfectly on any device."
-  },
-  {
-    question: "Do you provide technical support after the site goes live?",
-    answer: "Yes, we provide priority support for all our clients. We also offer a training session for your team to ensure you can manage inquiries and minor updates independently."
-  },
-  {
-    question: "Can I upgrade my package later?",
-    answer: "Yes, our systems are built to scale. You can start with the Essentials plan and upgrade to Growth or Global Leader as your international operations expand."
   }
 ];
 
 // --- COMPONENTS ---
 const App: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>({
-    businessName: '',
-    contactPerson: '',
-    email: '',
-    phone: '',
-    industry: 'Manufacturer',
-    selectedPackage: PackageType.GROWTH,
-    message: ''
-  });
-
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus('submitting');
-
-    try {
-      // Send data to Google Apps Script
-      // mode: 'no-cors' is used because Apps Script does not return proper CORS headers for JSON POSTs, 
-      // but the request will still reach the script and execute correctly.
-      await fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      setStatus('success');
-      // Reset form on success
-      setFormData({
-        businessName: '',
-        contactPerson: '',
-        email: '',
-        phone: '',
-        industry: 'Manufacturer',
-        selectedPackage: PackageType.GROWTH,
-        message: ''
-      });
-    } catch (error) {
-      console.error('Submission error:', error);
-      setStatus('error');
-    }
-  };
 
   return (
     <div className="min-h-screen bg-white selection:bg-blue-100 pb-20 md:pb-0 font-['Inter']">
@@ -234,7 +144,7 @@ const App: React.FC = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8 w-full">
               <a 
-                href="#services" 
+                href="#contact" 
                 className="px-16 py-8 bg-red-600 text-white font-black text-2xl rounded-[2.5rem] hover:bg-red-700 shadow-[0_25px_60px_rgba(220,38,38,0.4)] transition-all duration-300 hover:scale-105 hover:-translate-y-2 transform active:scale-95 text-center ring-4 ring-red-100/30"
               >
                 Claim My Exclusive Offer
@@ -262,223 +172,126 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* Services/Pricing */}
+      {/* Pricing */}
       <section id="services" className="py-32 px-6 md:px-12">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">Unbeatable Launch Packages</h2>
-            <p className="text-slate-500 text-lg max-w-3xl mx-auto">Dominate the EU, UK, New Zealand, Australia, and Africa before every big company starts replacing you.</p>
-          </div>
-
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-20 tracking-tight">Unbeatable Launch Packages</h2>
           <div className="grid md:grid-cols-3 gap-8">
-            {PLANS.map((plan) => {
-              const isEssential = plan.id === PackageType.BASIC;
-              const isGrowth = plan.id === PackageType.GROWTH;
-              const parts = plan.description.split(' | ');
-              
-              return (
-                <div key={plan.id} className={`p-10 rounded-[2.5rem] border-4 transition-all flex flex-col ${
-                  isGrowth 
-                    ? 'border-blue-500 bg-white ring-8 ring-blue-50' 
-                    : isEssential 
-                      ? 'border-[#FFC107] bg-white' 
-                      : 'border-slate-100 bg-white'
-                } hover:shadow-2xl`}>
-                  <div className="flex-grow space-y-8">
-                    <div className="space-y-4">
-                      <h3 className="text-3xl font-black text-slate-900">{plan.name}</h3>
-                      {isEssential && plan.badgeText && (
-                        <div className="w-full py-2.5 bg-[#F59E0B] text-white text-[11px] font-black rounded-lg text-center tracking-tighter">
-                          {plan.badgeText}
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xl font-bold text-slate-400">₹</span>
-                      <span className="text-6xl font-black text-slate-900 tracking-tighter">{plan.price.toLocaleString()}</span>
-                    </div>
-
-                    <div className="space-y-6">
-                      <p className="text-[15px] text-slate-600 font-semibold leading-relaxed">{parts[0]}</p>
-                      <div className={`p-5 rounded-xl border-2 ${isEssential ? 'bg-amber-50 border-amber-100' : 'bg-blue-50 border-blue-100'}`}>
-                        <p className={`text-[15px] font-black ${isEssential ? 'text-amber-900' : 'text-blue-700'}`}>
-                          {parts[1]}
-                        </p>
-                      </div>
-                      <p className="text-xs italic text-slate-400 leading-relaxed font-medium">{parts[2]}</p>
-                    </div>
-
-                    <ul className="space-y-4 pt-8 border-t border-slate-100">
-                      {plan.features.map(f => (
-                        <li key={f} className="flex items-center gap-3.5 text-sm font-bold text-slate-700">
-                          <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <a href={plan.razorpayLink} target="_blank" className={`mt-10 w-full py-5 rounded-2xl text-center font-black transition-all text-lg ${
-                    plan.highlight 
-                      ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-xl shadow-blue-100' 
-                      : isEssential 
-                        ? 'bg-[#F59E0B] text-white hover:bg-amber-600 shadow-xl shadow-amber-100' 
-                        : 'bg-slate-900 text-white hover:bg-black'
-                  }`}>
-                    Order {plan.name}
-                  </a>
+            {PLANS.map((plan) => (
+              <div key={plan.id} className={`p-8 rounded-[2.5rem] border-4 transition-all flex flex-col ${plan.highlight ? 'border-blue-500 bg-white ring-8 ring-blue-50' : 'border-slate-100 bg-white'} hover:shadow-2xl`}>
+                <div className="flex-grow space-y-6">
+                  <h3 className="text-3xl font-black">{plan.name}</h3>
+                  <div className="text-5xl font-black text-slate-900">₹{plan.price.toLocaleString()}</div>
+                  <ul className="space-y-3 text-left">
+                    {plan.features.map(f => (
+                      <li key={f} className="flex items-center gap-2 text-sm font-bold text-slate-600">
+                        <span className="text-green-500">✓</span> {f}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Process */}
-      <section id="process" className="py-32 px-6 md:px-12 bg-slate-900 text-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-20 text-center lg:text-left">
-            <h2 className="text-4xl md:text-5xl font-black mb-6">Our Workflow</h2>
-            <p className="text-slate-400 text-lg">Systematic engineering of your digital presence.</p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
-            {PROCESS_STEPS.map(step => (
-              <div key={step.number} className="group">
-                <div className="text-6xl font-black text-white/5 mb-4 group-hover:text-blue-600/20 transition-colors">{step.number}</div>
-                <h4 className="text-xl font-bold mb-3">{step.title}</h4>
-                <p className="text-slate-400 text-sm leading-relaxed">{step.description}</p>
+                <a href="#contact" className="mt-8 py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-black transition text-center">Select {plan.name}</a>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
+      {/* Process Section (RESTORED) */}
+      <section id="process" className="py-32 px-6 md:px-12 bg-slate-900 text-white rounded-t-[4rem] md:rounded-t-[8rem]">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-12 items-center mb-16">
+            <div className="md:col-span-2 space-y-6">
+              <h2 className="text-4xl md:text-5xl font-black">Our Workflow</h2>
+              <p className="text-slate-400 text-lg max-w-2xl">
+                Systematic engineering of your digital presence. We don't just build websites; we build marketing engines for industrial growth.
+              </p>
+            </div>
+            <div className="hidden md:flex justify-end">
+              <div className="p-8 bg-blue-600 rounded-2xl rotate-3 shadow-2xl">
+                <p className="font-black text-xl uppercase tracking-tighter">7-14 Day Delivery</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
+            {PROCESS_STEPS.map((step) => (
+              <div key={step.number} className="relative group">
+                <div className="text-6xl font-black text-white/5 absolute -top-8 -left-4 group-hover:text-blue-500/20 transition duration-500">{step.number}</div>
+                <div className="relative z-10 space-y-3">
+                  <div className="w-12 h-1 bg-blue-600 mb-4 rounded-full"></div>
+                  <h4 className="text-xl font-bold">{step.title}</h4>
+                  <p className="text-slate-400 text-sm leading-relaxed">{step.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
       <section id="faq" className="py-32 px-6 md:px-12 bg-white">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6">Common Questions</h2>
-            <p className="text-slate-500 text-lg">Everything you need to know about our industrial web services.</p>
-          </div>
+          <h2 className="text-4xl font-black text-center mb-16">Frequently Asked Questions</h2>
           <div className="space-y-4">
             {FAQ_DATA.map((item, idx) => (
-              <div key={idx} className="border border-slate-100 rounded-2xl overflow-hidden transition-all hover:border-blue-100">
+              <div key={idx} className="border border-slate-100 rounded-2xl overflow-hidden">
                 <button 
                   onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
-                  className="w-full px-8 py-6 text-left flex justify-between items-center bg-white hover:bg-slate-50 transition-colors"
+                  className="w-full px-8 py-6 text-left flex justify-between items-center bg-white hover:bg-slate-50 font-bold text-lg"
                 >
-                  <span className="text-lg font-bold text-slate-900">{item.question}</span>
-                  <span className={`text-2xl transition-transform ${openFaqIndex === idx ? 'rotate-180' : ''}`}>
-                    {openFaqIndex === idx ? '−' : '+'}
-                  </span>
+                  {item.question}
+                  <span>{openFaqIndex === idx ? '−' : '+'}</span>
                 </button>
-                {openFaqIndex === idx && (
-                  <div className="px-8 pb-8 text-slate-600 leading-relaxed font-medium">
-                    {item.answer}
-                  </div>
-                )}
+                {openFaqIndex === idx && <div className="px-8 pb-8 text-slate-500 font-medium">{item.answer}</div>}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Contact Form */}
+      {/* Embedded External Form */}
       <section id="contact" className="py-32 px-6 md:px-12 bg-slate-50">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="bg-white rounded-[3rem] shadow-2xl border border-slate-100 overflow-hidden grid lg:grid-cols-5">
-            <div className="lg:col-span-2 bg-blue-600 p-12 text-white flex flex-col justify-between">
-              <div>
-                <h3 className="text-3xl font-black mb-4">Start Your Project</h3>
-                <p className="opacity-80 text-sm leading-relaxed mb-10">Connect with our specialists to blueprint your new website. Your details will be sent directly to findtarunph@gmail.com and logged in our Google Sheet.</p>
-                <div className="space-y-6">
-                  <div className="flex gap-4 items-center">
-                    <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-xl">📞</div>
-                    <span className="font-bold">+91 721 787 3028</span>
-                  </div>
-                  <div className="flex gap-4 items-center">
-                    <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-xl">✉️</div>
-                    <span className="font-bold">samar@bloggingstudio.in</span>
-                  </div>
+            <div className="lg:col-span-2 bg-blue-600 p-12 text-white flex flex-col justify-start">
+              <div className="space-y-12">
+                <h3 className="text-4xl font-black tracking-tight">Start Your Project</h3>
+                <div className="space-y-10 font-bold">
+                    <div className="flex flex-col gap-2">
+                      <span className="text-4xl">📞</span>
+                      <span className="text-2xl tracking-tight">+91 721 787 3028</span>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <span className="text-4xl">✉️</span>
+                      <span className="text-2xl tracking-tight">samar@bloggingstudio.in</span>
+                    </div>
                 </div>
               </div>
-              <div className="pt-10 text-xs font-bold opacity-50 uppercase tracking-widest">Available Mon-Sat</div>
             </div>
-            <div className="lg:col-span-3 p-12">
-              {status === 'success' ? (
-                <div className="h-full flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in duration-500">
-                  <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-4xl">✓</div>
-                  <h3 className="text-2xl font-black text-slate-900">Inquiry Sent Successfully!</h3>
-                  <p className="text-slate-500 font-medium">We've received your details and logged them in our system. A team member will contact you shortly.</p>
-                  <button 
-                    onClick={() => setStatus('idle')}
-                    className="text-blue-600 font-bold underline hover:text-blue-700"
-                  >
-                    Send another inquiry
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid sm:grid-cols-2 gap-6">
-                    <input required name="businessName" value={formData.businessName} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Business Name" />
-                    <input required name="contactPerson" value={formData.contactPerson} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Contact Person" />
-                  </div>
-                  <div className="grid sm:grid-cols-2 gap-6">
-                    <input required type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Work Email" />
-                    <input required name="phone" value={formData.phone} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Phone Number" />
-                  </div>
-                  <select name="selectedPackage" value={formData.selectedPackage} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium appearance-none">
-                    {PLANS.map(p => <option key={p.id} value={p.id}>{p.name} - ₹{p.price.toLocaleString()}</option>)}
-                  </select>
-                  <textarea rows={3} name="message" value={formData.message} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm font-medium" placeholder="Industry details or specific requirements..."></textarea>
-                  <button 
-                    disabled={status === 'submitting'}
-                    type="submit" 
-                    className={`w-full py-5 bg-blue-600 text-white font-black rounded-xl transition shadow-lg flex items-center justify-center gap-2 ${status === 'submitting' ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-700 active:scale-[0.98]'}`}
-                  >
-                    {status === 'submitting' ? (
-                      <>
-                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Sending...
-                      </>
-                    ) : (
-                      <>Send Inquiry <span className="text-xl">🚀</span></>
-                    )}
-                  </button>
-                  {status === 'error' && (
-                    <p className="text-center text-red-500 font-bold text-sm">
-                      Something went wrong. Please check your internet or try again later.
-                    </p>
-                  )}
-                </form>
-              )}
+            
+            <div className="lg:col-span-3 p-4 flex justify-center items-center bg-white overflow-hidden">
+              <div className="w-full max-w-[640px] aspect-square lg:aspect-auto">
+                <iframe 
+                  src="https://automateforms.ai/form/36093e18-3273-4fd5-9ba5-c5bcf48e97d8?embedded=true" 
+                  width="100%" 
+                  height="488" 
+                  frameBorder="0" 
+                  marginHeight={0} 
+                  marginWidth={0}
+                  className="rounded-xl"
+                >
+                  Loading…
+                </iframe>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-20 px-6 md:px-12 bg-white border-t border-slate-100 text-center md:text-left">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
-          <div className="text-2xl font-black text-blue-600 uppercase">EXPORT<span className="text-slate-800">LAUNCH</span></div>
-          <p className="text-slate-400 text-sm font-medium">© 2024 ExportLaunch Digital. Managed by bloggingstudio.in</p>
-          <div className="flex gap-8 text-xs font-black uppercase tracking-widest text-slate-400">
-            <a href="#" className="hover:text-blue-600 transition underline underline-offset-4">Privacy</a>
-            <a href="#" className="hover:text-blue-600 transition underline underline-offset-4">Terms</a>
-          </div>
-        </div>
+      <footer className="py-20 bg-white border-t text-center text-slate-400 text-sm">
+        © 2024 ExportLaunch | Managed by bloggingstudio.in
       </footer>
-
-      {/* Fixed Mobile Button */}
-      <div className="fixed bottom-0 left-0 w-full p-4 md:hidden z-[60] bg-white/10 backdrop-blur-sm">
-        <a href="#services" className="block w-full py-5 bg-red-600 text-white font-black text-lg rounded-2xl text-center shadow-[0_10px_30px_rgba(220,38,38,0.4)] active:scale-95 transition-all">
-          Claim My Exclusive Offer
-        </a>
-      </div>
     </div>
   );
 };
