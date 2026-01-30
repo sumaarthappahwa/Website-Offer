@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client';
 
 // --- CONFIGURATION ---
 // PASTE YOUR DEPLOYED GOOGLE APPS SCRIPT URL HERE
-const SCRIPT_URL = 'https://script.google.com/macros/library/d/1Ak7VNjUyNYR4PmcWlSGIQ-zl0iga0aYFYjNaq9LReJ2A1RngSsNGL0RQ/1';
+const SCRIPT_URL = https://script.google.com/macros/s/AKfycbxjUK-PKazvCmjLmq29xgQpyons5K4K3zP0pq1Ae19c4XlMkHhl27Sc1kbZ6E3C7NcA/exec;
 
 // --- TYPES ---
 enum PackageType {
