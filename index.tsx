@@ -39,7 +39,13 @@ interface FormData {
   phone: string;
   industry: string;
   selectedPackage: PackageType;
+  domainPref: string;
   message: string;
+}
+
+interface FAQItem {
+  question: string;
+  answer: string;
 }
 
 // --- CONSTANTS ---
@@ -117,6 +123,33 @@ const PLANS: PricingPlan[] = [
   }
 ];
 
+const FAQ_DATA: FAQItem[] = [
+  {
+    question: "Does the price include domain and hosting?",
+    answer: "Yes, all our plans include a premium domain and industrial-grade hosting for the first year (worth ₹10,000/-) at no extra cost to you."
+  },
+  {
+    question: "What are the renewal costs after the first year?",
+    answer: "We believe in complete transparency. Your renewal cost is fixed at ₹8,000/- per year, which covers your premium domain, high-speed hosting, and SSL security certificate."
+  },
+  {
+    question: "How long does it take to launch my website?",
+    answer: "Our standard turnaround time is 7 to 14 business days, depending on how quickly we receive your product technical sheets and business content."
+  },
+  {
+    question: "Is the website optimized for mobile and tablets?",
+    answer: "Absolutely. Every website we build is mobile-first and fully responsive, ensuring your global buyers can view your catalog perfectly on any device."
+  },
+  {
+    question: "Do you provide technical support after the site goes live?",
+    answer: "Yes, we provide priority support for all our clients. We also offer a training session for your team to ensure you can manage inquiries and minor updates independently."
+  },
+  {
+    question: "Can I upgrade my package later?",
+    answer: "Yes, our systems are built to scale. You can start with the Essentials plan and upgrade to Growth or Global Leader as your international operations expand."
+  }
+];
+
 // --- COMPONENTS ---
 const App: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
@@ -126,30 +159,54 @@ const App: React.FC = () => {
     phone: '',
     industry: 'Manufacturer',
     selectedPackage: PackageType.GROWTH,
+    domainPref: '',
     message: ''
   });
 
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [copied, setCopied] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const subject = "Website Inquiry - ExportLaunch";
-    const body = `New Enquiry Details:
+  const getEmailBody = () => {
+    return `New Enquiry Details:
 ----------------------------------
 Business: ${formData.businessName}
+Industry: ${formData.industry}
 Contact: ${formData.contactPerson}
 Email: ${formData.email}
 Phone: ${formData.phone}
 Package: ${formData.selectedPackage}
+Domain Preference: ${formData.domainPref || 'Not specified'}
 Message: ${formData.message}
 ----------------------------------`;
-    window.location.href = `mailto:samar@bloggingstudio.in?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const subject = `Website Inquiry - ${formData.businessName}`;
+    const body = getEmailBody();
+    
+    // Attempting to open mail client via hidden anchor to avoid popup blockers
+    const mailtoUrl = `mailto:samar@bloggingstudio.in?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const link = document.createElement('a');
+    link.href = mailtoUrl;
+    link.click();
+    
     setFormSubmitted(true);
+    setCopied(false);
+  };
+
+  const copyToClipboard = () => {
+    const body = getEmailBody();
+    navigator.clipboard.writeText(body).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   return (
@@ -160,6 +217,7 @@ Message: ${formData.message}
         <div className="hidden md:flex space-x-8 text-sm font-bold text-slate-600 uppercase tracking-widest">
           <a href="#services" className="hover:text-blue-600 transition">Services</a>
           <a href="#process" className="hover:text-blue-600 transition">Process</a>
+          <a href="#faq" className="hover:text-blue-600 transition">FAQ</a>
           <a href="#contact" className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Get Started</a>
         </div>
       </nav>
@@ -167,7 +225,7 @@ Message: ${formData.message}
       {/* Hero */}
       <section className="pt-40 pb-24 px-6 md:px-12 bg-gradient-to-b from-blue-50/50 to-white text-center">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
-          <div className="space-y-8 flex flex-col items-center lg:items-center">
+          <div className="space-y-8 flex flex-col items-center">
             <span className="inline-block px-4 py-1.5 bg-blue-100 text-blue-700 text-xs font-black rounded-full uppercase tracking-widest">Digital Powerhouse</span>
             <h1 className="text-6xl md:text-7xl font-black text-slate-900 leading-[1.1] tracking-tight">
               Fueling Your <br />
@@ -176,13 +234,16 @@ Message: ${formData.message}
             <p className="text-xl text-slate-600 max-w-xl mx-auto leading-relaxed">
               Professional web development for exporters and manufacturers. One-year free domain/hosting. Fixed renewals. No hidden costs.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4 w-full">
-              <a href="#services" className="px-12 py-6 bg-red-600 text-white font-black text-xl rounded-2xl hover:bg-red-700 shadow-[0_20px_50px_rgba(220,38,38,0.3)] transition-all hover:-translate-y-1 transform active:scale-95 text-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8 w-full">
+              <a 
+                href="#services" 
+                className="px-16 py-8 bg-red-600 text-white font-black text-2xl rounded-[2.5rem] hover:bg-red-700 shadow-[0_25px_60px_rgba(220,38,38,0.4)] transition-all duration-300 hover:scale-105 hover:-translate-y-2 transform active:scale-95 text-center ring-4 ring-red-100/30"
+              >
                 Claim My Exclusive Offer
               </a>
             </div>
           </div>
-          <div className="relative hidden lg:block">
+          <div className="relative hidden lg:block text-left">
             <div className="absolute inset-0 bg-blue-600/5 rounded-3xl -rotate-3"></div>
             <div className="relative z-10 p-10 bg-white rounded-3xl border border-slate-100 shadow-2xl">
               <div className="flex gap-2 mb-6">
@@ -215,7 +276,6 @@ Message: ${formData.message}
             {PLANS.map((plan) => {
               const isEssential = plan.id === PackageType.BASIC;
               const isGrowth = plan.id === PackageType.GROWTH;
-              const isPremium = plan.id === PackageType.PREMIUM;
               const parts = plan.description.split(' | ');
               
               return (
@@ -243,14 +303,11 @@ Message: ${formData.message}
 
                     <div className="space-y-6">
                       <p className="text-[15px] text-slate-600 font-semibold leading-relaxed">{parts[0]}</p>
-                      
-                      {/* Featured Worth section */}
                       <div className={`p-5 rounded-xl border-2 ${isEssential ? 'bg-amber-50 border-amber-100' : 'bg-blue-50 border-blue-100'}`}>
                         <p className={`text-[15px] font-black ${isEssential ? 'text-amber-900' : 'text-blue-700'}`}>
                           {parts[1]}
                         </p>
                       </div>
-                      
                       <p className="text-xs italic text-slate-400 leading-relaxed font-medium">{parts[2]}</p>
                     </div>
 
@@ -299,6 +356,36 @@ Message: ${formData.message}
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section id="faq" className="py-32 px-6 md:px-12 bg-white">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6">Common Questions</h2>
+            <p className="text-slate-500 text-lg">Everything you need to know about our industrial web services.</p>
+          </div>
+          <div className="space-y-4">
+            {FAQ_DATA.map((item, idx) => (
+              <div key={idx} className="border border-slate-100 rounded-2xl overflow-hidden transition-all hover:border-blue-100">
+                <button 
+                  onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
+                  className="w-full px-8 py-6 text-left flex justify-between items-center bg-white hover:bg-slate-50 transition-colors"
+                >
+                  <span className="text-lg font-bold text-slate-900">{item.question}</span>
+                  <span className={`text-2xl transition-transform ${openFaqIndex === idx ? 'rotate-180' : ''}`}>
+                    {openFaqIndex === idx ? '−' : '+'}
+                  </span>
+                </button>
+                {openFaqIndex === idx && (
+                  <div className="px-8 pb-8 text-slate-600 leading-relaxed font-medium">
+                    {item.answer}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Contact Form */}
       <section id="contact" className="py-32 px-6 md:px-12 bg-slate-50">
         <div className="max-w-4xl mx-auto">
@@ -309,44 +396,102 @@ Message: ${formData.message}
                 <p className="opacity-80 text-sm leading-relaxed mb-10">Connect with our specialists to blueprint your new website. No pressure, just strategy.</p>
                 <div className="space-y-6">
                   <div className="flex gap-4 items-center">
-                    <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">📞</div>
+                    <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-xl">📞</div>
                     <span className="font-bold">+91 721 787 3028</span>
                   </div>
                   <div className="flex gap-4 items-center">
-                    <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">✉️</div>
+                    <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-xl">✉️</div>
                     <span className="font-bold">samar@bloggingstudio.in</span>
                   </div>
                 </div>
               </div>
               <div className="pt-10 text-xs font-bold opacity-50 uppercase tracking-widest">Available Mon-Sat</div>
             </div>
-            <form onSubmit={handleSubmit} className="lg:col-span-3 p-12 space-y-6">
-              <div className="grid sm:grid-cols-2 gap-6">
-                <input required name="businessName" value={formData.businessName} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm" placeholder="Business Name" />
-                <input required name="contactPerson" value={formData.contactPerson} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm" placeholder="Contact Person" />
-              </div>
-              <div className="grid sm:grid-cols-2 gap-6">
-                <input required type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm" placeholder="Work Email" />
-                <input required name="phone" value={formData.phone} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm" placeholder="Phone Number" />
-              </div>
-              <select name="selectedPackage" value={formData.selectedPackage} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm appearance-none">
-                {PLANS.map(p => <option key={p.id} value={p.id}>{p.name} - ₹{p.price.toLocaleString()}</option>)}
-              </select>
-              <textarea rows={3} name="message" value={formData.message} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 transition outline-none text-sm" placeholder="Industry details or specific requirements..."></textarea>
-              <button type="submit" className="w-full py-5 bg-blue-600 text-white font-black rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100 flex items-center justify-center gap-2">
-                Send Inquiry <span>🚀</span>
-              </button>
-              {formSubmitted && <p className="text-center text-green-600 font-bold text-sm">Thank you! We'll be in touch soon.</p>}
-            </form>
+            
+            <div className="lg:col-span-3 p-12 space-y-6">
+              {!formSubmitted ? (
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Business Name</label>
+                      <input required name="businessName" value={formData.businessName} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition outline-none text-sm font-semibold" placeholder="e.g. Acme Manufacturing" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Contact Person</label>
+                      <input required name="contactPerson" value={formData.contactPerson} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition outline-none text-sm font-semibold" placeholder="Full Name" />
+                    </div>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Industry Type</label>
+                      <input name="industry" value={formData.industry} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition outline-none text-sm font-semibold" placeholder="e.g. Textiles, Solar, Steel" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Phone Number</label>
+                      <input required name="phone" value={formData.phone} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition outline-none text-sm font-semibold" placeholder="+91 ..." />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Work Email</label>
+                    <input required type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition outline-none text-sm font-semibold" placeholder="email@company.com" />
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Plan Selected</label>
+                      <select name="selectedPackage" value={formData.selectedPackage} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition outline-none text-sm font-semibold appearance-none cursor-pointer">
+                        {PLANS.map(p => <option key={p.id} value={p.id}>{p.name} - ₹{p.price.toLocaleString()}</option>)}
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Domain Preference</label>
+                      <input name="domainPref" value={formData.domainPref} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition outline-none text-sm font-semibold" placeholder="e.g. acme-export.com" />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Requirements / Message</label>
+                    <textarea rows={3} name="message" value={formData.message} onChange={handleInputChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition outline-none text-sm font-semibold" placeholder="Any specific requirements..."></textarea>
+                  </div>
+                  <button type="submit" className="w-full py-5 bg-blue-600 text-white font-black rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100 flex items-center justify-center gap-2 transform active:scale-95 duration-200">
+                    Send Inquiry <span className="text-xl">🚀</span>
+                  </button>
+                </form>
+              ) : (
+                <div className="h-full flex flex-col justify-center items-center text-center space-y-8 animate-in fade-in zoom-in duration-500">
+                  <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-4xl">✓</div>
+                  <div className="space-y-4">
+                    <h3 className="text-2xl font-black text-slate-900">Inquiry Link Triggered!</h3>
+                    <p className="text-slate-500 font-medium leading-relaxed">
+                      Your email client should have opened. If it didn't, please click the button below to copy the details and send them manually to <span className="text-blue-600 font-bold">samar@bloggingstudio.in</span>.
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-4 w-full">
+                    <button 
+                      onClick={copyToClipboard}
+                      className={`w-full py-4 rounded-xl font-black transition-all border-2 flex items-center justify-center gap-2 ${
+                        copied ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-blue-600 text-blue-600 hover:bg-blue-50'
+                      }`}
+                    >
+                      {copied ? 'Copied to Clipboard! ✓' : 'Copy Details to Clipboard 📋'}
+                    </button>
+                    <button 
+                      onClick={() => setFormSubmitted(false)}
+                      className="text-slate-400 text-sm font-bold hover:text-slate-600 transition underline underline-offset-4"
+                    >
+                      Wait, I need to change something
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-20 px-6 md:px-12 bg-white border-t border-slate-100">
+      <footer className="py-20 px-6 md:px-12 bg-white border-t border-slate-100 text-center md:text-left">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
           <div className="text-2xl font-black text-blue-600 uppercase">EXPORT<span className="text-slate-800">LAUNCH</span></div>
-          <p className="text-slate-400 text-sm">© 2024 ExportLaunch Digital. Managed by bloggingstudio.in</p>
+          <p className="text-slate-400 text-sm font-medium">© 2024 ExportLaunch Digital. Managed by bloggingstudio.in</p>
           <div className="flex gap-8 text-xs font-black uppercase tracking-widest text-slate-400">
             <a href="#" className="hover:text-blue-600 transition underline underline-offset-4">Privacy</a>
             <a href="#" className="hover:text-blue-600 transition underline underline-offset-4">Terms</a>
