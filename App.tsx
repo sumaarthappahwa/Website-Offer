@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { PLANS, PROCESS_STEPS } from './constants';
 import { PackageType, FormData } from './types';
 
@@ -363,6 +364,7 @@ Industry Context/Message: ${formData.message}
           </div>
         </div>
       </footer>
+      <Analytics />
     </div>
   );
 };
