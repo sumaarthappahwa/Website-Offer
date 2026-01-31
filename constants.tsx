@@ -54,7 +54,7 @@ export const PLANS: PricingPlan[] = [
       { title: "Development", description: "Single-fold architecture with optimized landing sections." },
       { title: "Pages", description: "Home, About, Services, Gallery, and Contact with Form integration." }
     ],
-    razorpayLink: "https://rzp.io/rzp/GDcsLwH"
+    razorpayLink: "https://rzp.io/rzp/hC0PBNjQ"
   },
   {
     id: PackageType.GROWTH,
@@ -76,7 +76,7 @@ export const PLANS: PricingPlan[] = [
       { title: "Local Visibility", description: "Full setup and optimization of your Google Business Profile for local map ranking." },
       { title: "Product Catalog", description: "Dynamic product display with technical specifications and inquiry buttons per product." }
     ],
-    razorpayLink: "https://rzp.io/rzp/dhV3ctX"
+    razorpayLink: "https://rzp.io/rzp/URxLuVU"
   },
   {
     id: PackageType.PREMIUM,
@@ -97,6 +97,6 @@ export const PLANS: PricingPlan[] = [
       { title: "Paid Ads Launch", description: "We manage and set up your initial $100 ad spend across Meta and LinkedIn to jumpstart leads." },
       { title: "Export Features", description: "Multilingual content support and direct WhatsApp API for instant global inquiries." }
     ],
-    razorpayLink: "https://rzp.io/rzp/OcOeP4sU"
+    razorpayLink: "https://rzp.io/rzp/CmTw7mZR"
   }
 ];

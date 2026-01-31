@@ -73,7 +73,7 @@ const PLANS: PricingPlan[] = [
     badgeText: "🔥 ONLY FOR THE FIRST 10 BUSINESSES!",
     description: "A professional digital start tailored for SMEs wanting an immediate global identity. | Worth 10,000/- hosting and domain free for one year | 🔥 Act Fast — Limited launch offer for early sign‑ups only!",
     features: ["5-Page Website", "Free Domain (1yr)", "Free Hosting (1yr)", "SSL Secure", "Mobile Responsive", "₹ 8,000 Renewal"],
-    razorpayLink: "https://rzp.io/rzp/GDcsLwH"
+    razorpayLink: "https://rzp.io/rzp/hC0PBNjQ"
   },
   {
     id: PackageType.GROWTH,
@@ -82,7 +82,7 @@ const PLANS: PricingPlan[] = [
     highlight: true,
     description: "For Manufacturers ready to lead the national market with advanced search visibility. | Worth 10,000/- hosting and domain free for one year | Includes full Google Business Profile (GBP) optimization and SEO.",
     features: ["Advanced Dynamic Website", "Full SEO Setup", "GBP Optimization", "Catalog (20 items)", "Advanced Forms", "Priority Support", "₹ 8,000 Renewal"],
-    razorpayLink: "https://rzp.io/rzp/dhV3ctX"
+    razorpayLink: "https://rzp.io/rzp/URxLuVU"
   },
   {
     id: PackageType.PREMIUM,
@@ -90,7 +90,7 @@ const PLANS: PricingPlan[] = [
     price: 36000,
     description: "Tailored for high-scale Exporters looking to dominate international territories. | Worth 10,000/- hosting and domain free for one year | Includes premium ad credits for LinkedIn and Meta to jumpstart leads.",
     features: ["Advanced Dynamic Website", "Everything in Growth", "$50 Meta Ads", "$50 LinkedIn Ads", "Multilingual Support", "WhatsApp Integration", "₹ 8,000 Renewal"],
-    razorpayLink: "https://rzp.io/rzp/OcOeP4sU"
+    razorpayLink: "https://rzp.io/rzp/CmTw7mZR"
   }
 ];
 
